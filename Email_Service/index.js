@@ -10,6 +10,9 @@ const app = express();
 
 //configure the Express middleware to accept CORS requests and parse request body into JSON
 app.use(cors({ origin: "*" }));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+// app.use(express.json());
 app.use(bodyParser.json());
 
 var fs = require("fs");
@@ -21,7 +24,7 @@ app.listen(3000, () => {
 
 // define a sendmail endpoint, which will send emails and response with the corresponding status
 app.post("/sendmail", (req, res) => {
-  console.log("request came", req, res);
+  // console.log("request came", req, res);
   let user = req.body;
   sendMail(user, (err, info) => {
     if (err) {
@@ -46,13 +49,19 @@ const sendMail = (user, callback) => {
     },
   });
 
-  console.log("filename", user);
+  // console.log("filename", user);
 
   const mailOptions = {
     from: process.env.email,
     to: "jaya13194@gmail.com",
     subject: user.subject,
-    attachment: [user.file],
+    attachments: [
+      {
+        filename: user.fileName || `attachment.pdf`,
+        path: user.file,
+        // encoding: "base64",
+      },
+    ],
     html: `<div>
       <h4 style="border-bottom: 1px solid black">Here is the query with detail of customer.</h4>
       <ul>
